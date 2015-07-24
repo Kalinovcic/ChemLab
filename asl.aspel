@@ -1,0 +1,23 @@
+import "../Aspel3/asl/__bits/LANG.aspel";
+
+import "../Aspel3/asl/system.aspel";
+import "../Aspel3/asl/thread.aspel";
+
+import "../Aspel3/asl/file.aspel";
+import "../Aspel3/asl/istream.aspel";
+import "../Aspel3/asl/ostream.aspel";
+
+import "../Aspel3/asl/glew.aspel";
+import "../Aspel3/asl/glfw3.aspel";
+
+import "../Aspel3/asl/memory.aspel";
+import "../Aspel3/asl/string.aspel";
+
+import "../Aspel3/asl/math.aspel";
+import "../Aspel3/asl/random.aspel";
+import "../Aspel3/asl/time.aspel";
+
+import "../Aspel3/asl/__bits/image/bmp.aspel";
+
+// using asl.*;
+// using glfw3.*;

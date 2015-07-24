@@ -1,0 +1,6 @@
+
+Vec2 :: type struct
+{
+    x: float32;
+    y: float32;
+};

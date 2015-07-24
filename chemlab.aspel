@@ -1,0 +1,128 @@
+import "asl.aspel";
+import "util.aspel";
+import "sprite.aspel";
+
+window: glfw3.GLFWwindow^;
+
+abortKemijam :: func void()
+{
+    asl.abort();
+}
+
+errorCallback :: func void(error: int32, desc: int8^)
+{
+    reportString(nullstrToString(desc));
+    abortKemijam();
+}
+
+keyCallback :: func void(window: glfw3.GLFWwindow^, key: int32, scancode: int32,
+                         action: int32, mods: int32)
+{
+
+}
+
+openWindow :: func void()
+{
+    glfw3.glfwSetErrorCallback(errorCallback);
+
+    if glfw3.glfwInit() != gl.GL_TRUE then
+        abortKemijam();
+
+    window = glfw3.glfwCreateWindow(800, 450, "ChemLab", null, null);
+    if window == 0
+    {
+        glfw3.glfwTerminate();
+        abortKemijam();
+    }
+
+    glfw3.glfwMakeContextCurrent(window);
+    glfw3.glfwSwapInterval(1);
+    glfw3.glfwSetKeyCallback(window, keyCallback);
+}
+
+closeWindow :: func void()
+{
+    glfw3.glfwDestroyWindow(window);
+    glfw3.glfwTerminate();
+}
+
+initGL :: func void()
+{
+    gl.glEnable(gl.GL_TEXTURE_2D);
+    gl.glEnable(gl.GL_BLEND);
+    gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA);
+}
+
+render :: func void()
+{
+    gl.glTranslatef(8.0, 4.5, 0.0);
+    gl.glRotatef(cast(float32) glfw3.glfwGetTime() * 50.0, 0.0, 0.0, 1.0);
+    gl.glBegin(gl.GL_QUADS);
+      gl.glTexCoord2f(0, 0); gl.glVertex3f(-3, -3, 0);
+      gl.glTexCoord2f(1, 0); gl.glVertex3f( 3, -3, 0);
+      gl.glTexCoord2f(1, 1); gl.glVertex3f( 3,  3, 0);
+      gl.glTexCoord2f(0, 1); gl.glVertex3f(-3,  3, 0);
+    gl.glEnd();
+}
+
+renderLoop :: func void()
+{
+    initGL();
+
+    bmp := asl.file("test.bmp");
+    width: uint32;
+    height: uint32;
+    pixels: uint8[] = new uint8[512 * 512 * 4];
+
+    bmpIS := asl.openFileInputStream(bmp);
+    if !asl.readBitmap(bmpIS, &width, &height, pixels)
+    {
+        reportString("Failed to load bitmap!\n");
+        abortKemijam();
+    }
+    bmpIS.close(bmpIS);
+
+    asl.releaseFile(bmp);
+
+    texture: gl.GLuint;
+    gl.glGenTextures(1, &texture);
+    gl.glBindTexture(gl.GL_TEXTURE_2D, texture);
+
+    mode: uint32 = gl.GL_RGBA;
+    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_S, gl.GL_REPEAT);
+    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_WRAP_T, gl.GL_REPEAT);
+    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_NEAREST);
+    gl.glTexParameteri(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_NEAREST);
+
+    gl.gluBuild2DMipmaps(gl.GL_TEXTURE_2D, 4, cast(gl.GLsizei) width, cast(gl.GLsizei) height,
+                         mode, gl.GL_UNSIGNED_BYTE, pixels);
+
+    while glfw3.glfwWindowShouldClose(window) != gl.GL_TRUE
+    {
+        width: int32;
+        height: int32;
+        glfw3.glfwGetFramebufferSize(window, &width, &height);
+
+        gl.glMatrixMode(gl.GL_PROJECTION);
+        gl.glLoadIdentity();
+        gl.glOrtho(0.0, 16.0, 0.0, 9.0, 1.0, -1.0);
+        gl.glViewport(0, 0, width, height);
+
+        gl.glClear(gl.GL_COLOR_BUFFER_BIT);
+        gl.glMatrixMode(gl.GL_MODELVIEW);
+        gl.glLoadIdentity();
+
+        gl.glBindTexture(gl.GL_TEXTURE_2D, texture);
+        render();
+
+        glfw3.glfwSwapBuffers(window);
+        glfw3.glfwPollEvents();
+    }
+}
+
+main :: func void(args: asl.string[])
+{
+    openWindow();
+    renderLoop();
+    closeWindow();
+}

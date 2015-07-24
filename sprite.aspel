@@ -1,0 +1,28 @@
+import "asl.aspel";
+import "vec2.aspel";
+
+Sprite :: type struct
+{
+    pos: Vec2;
+    rot: float32;
+    dim: Vec2;
+    tex: gl.GLuint;
+};
+
+renderSprite :: func void(sprite: Sprite^)
+{
+    gl.glPushMatrix();
+
+    gl.glTranslatef(sprite.pos.x, sprite.pos.y, 0);
+    gl.glRotatef(sprite.rot, 0, 0, 1);
+    gl.glScalef(sprite.dim.x * 0.5, sprite.dim.y * 0.5, 1);
+
+    gl.glBegin(gl.GL_QUADS);
+      gl.glTexCoord2f(0, 0); gl.glVertex2f(-0.5, -0.5);
+      gl.glTexCoord2f(1, 0); gl.glVertex2f( 0.5, -0.5);
+      gl.glTexCoord2f(1, 1); gl.glVertex2f( 0.5,  0.5);
+      gl.glTexCoord2f(0, 1); gl.glVertex2f(-0.5,  0.5);
+    gl.glEnd();
+
+    gl.glPopMatrix();
+}

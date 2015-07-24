@@ -1,0 +1,21 @@
+
+import "asl.aspel";
+
+nullstrToString :: func asl.string(nullstr: int8^)
+{
+    len: uint64 = 0;
+
+    cptr := nullstr;
+    while ^(nullstr + len) != 0 then
+        len = len + 1;
+
+    result: asl.string;
+    result.a = nullstr;
+    result.n = len;
+    return result;
+}
+
+reportString :: func void(msg: asl.string)
+{
+    asl.stdout.write(asl.stdout, msg.a, msg.n);
+}
